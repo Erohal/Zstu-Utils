@@ -75,7 +75,6 @@ def main():
     while True:
         credit_marks = 0
         total_credit = 0
-        print('\033[2J\033[0;0H')
         table.clear_rows()
         r = s.get(
             'https://jwglxt.webvpn.zstu.edu.cn/jwglxt/cjcx/cjcx_cxXsgrcj.html?doType=query&gnmkdm=N305005&su=2021316101119')
@@ -85,6 +84,7 @@ def main():
             credit_marks += float(item['xf']) * float(item['jd'])
             table.add_row([item['kcmc'], item['xf'],
                           item['bfzcj'], item['jd'], item['tjsj']])
+        print('\033[2J\033[0;0H')
         print(table)
         print('总学分: {}, 学分绩点和: {}, GPA: {}'.format(
             total_credit, credit_marks, credit_marks / total_credit))
