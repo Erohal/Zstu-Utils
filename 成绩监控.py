@@ -77,16 +77,18 @@ def main():
         total_credit = 0
         table.clear_rows()
         r = s.get(
-            'https://jwglxt.webvpn.zstu.edu.cn/jwglxt/cjcx/cjcx_cxXsgrcj.html?doType=query&gnmkdm=N305005&su=2021316101119')
+            'https://jwglxt.webvpn.zstu.edu.cn/jwglxt/cjcx/cjcx_cxXsgrcj.html?doType=query')
         j = json.loads(r.text)
         for item in j['items']:
+            if item['ksxz'] == '补考一':
+                continue
             total_credit += float(item['xf'])
             credit_marks += float(item['xf']) * float(item['jd'])
             table.add_row([item['kcmc'], item['xf'],
                           item['bfzcj'], item['jd'], item['tjsj']])
         print('\033[2J\033[0;0H')
         print(table)
-        print('总学分: {}, 学分绩点和: {}, GPA: {}'.format(
+        print('总学分: {:.1f}, 学分绩点和: {:.2f}, GPA: {:.2f}'.format(
             total_credit, credit_marks, credit_marks / total_credit))
         print('更新时间：' + datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
         sleep(args.frequency)
