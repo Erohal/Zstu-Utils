@@ -5,11 +5,11 @@ from datetime import datetime
 from re import compile
 from time import sleep
 
-from Crypto.Cipher import DES
-from Crypto.Util import Padding
+# from Crypto.Cipher import DES
+# from Crypto.Util import Padding
 from prettytable import PrettyTable
 from requests import Session
-
+from pyDes import *
 
 class ZstuSso:
     def __init__(self, username: str, password: str) -> None:
@@ -30,7 +30,7 @@ class ZstuSso:
                 'execution': execution,
                 'captcha_code': '',
                 'croypto': croypto,
-                'password': self.__encrypto_password(croypto),
+                'password': self.__encrypto_password_v2(croypto),
             }
         res = self.__session.post(login_url, payload, allow_redirects=False)
 
@@ -50,11 +50,16 @@ class ZstuSso:
         crypto_pat = compile('<p id="login-croypto">(.*?)</p>')
         return execution_pat.search(data).group(1), crypto_pat.search(data).group(1)
 
+    # def __encrypto_password(self, key: str) -> str:
+    #     key = b64decode(key)
+    #     enc = DES.new(key, DES.MODE_ECB)
+    #     data = Padding.pad(self.__password.encode('utf-8'), 16)
+    #     return b64encode(enc.encrypt(data))
+
     def __encrypto_password(self, key: str) -> str:
         key = b64decode(key)
-        enc = DES.new(key, DES.MODE_ECB)
-        data = Padding.pad(self.__password.encode('utf-8'), 16)
-        return b64encode(enc.encrypt(data))
+        enc = des(key, ECB, padmode=PAD_PKCS5)
+        return b64encode(enc.encrypt(self.__password.encode('utf-8')))
 
 
 def main():
@@ -79,8 +84,9 @@ def main():
         r = s.get(
             'https://jwglxt.webvpn.zstu.edu.cn/jwglxt/cjcx/cjcx_cxXsgrcj.html?doType=query')
         j = json.loads(r.text)
+        print(j)
         for item in j['items']:
-            if item['ksxz'] == '补考一':
+            if item['ksxz'] == '补考一' or item['cj'] == '放弃':
                 continue
             total_credit += float(item['xf'])
             credit_marks += float(item['xf']) * float(item['jd'])
