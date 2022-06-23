@@ -11,6 +11,7 @@ from prettytable import PrettyTable
 from requests import Session
 from pyDes import *
 
+
 class ZstuSso:
     def __init__(self, username: str, password: str) -> None:
         self.__username = username
@@ -64,9 +65,13 @@ class ZstuSso:
 
 def main():
     parser = argparse.ArgumentParser(description='浙江理工大学教务系统成绩监控')
-    parser.add_argument('-u', '--username', help='SSO账号', type=str, required=True)
-    parser.add_argument('-p', '--password', help='SSO密码', type=str, required=True)
-    parser.add_argument('-f', '--frequency', help='查询频率，单位秒', type=int, required=False, default=5)
+    parser.add_argument('-u', '--username', help='SSO账号',
+                        type=str, required=True)
+    parser.add_argument('-p', '--password', help='SSO密码',
+                        type=str, required=True)
+    parser.add_argument('-a', '--all', help='查询全部成绩', required=False, action='store_true')
+    parser.add_argument('-f', '--frequency', help='查询频率，单位秒',
+                        type=int, required=False, default=5)
     args = parser.parse_args()
 
     t = ZstuSso(args.username, args.password)
@@ -78,15 +83,18 @@ def main():
     credit_marks = 0
     total_credit = 0
 
+    url = 'https://jwglxt.webvpn.zstu.edu.cn/jwglxt/cjcx/cjcx_cxXsgrcj.html?doType=query'
     data = {
-        'queryModel.showCount': 100
+        'queryModel.showCount': 5000
     }
+    if args.all:
+        data['xqm'] = ''
+
     while True:
         credit_marks = 0
         total_credit = 0
         table.clear_rows()
-        r = s.post(
-            'https://jwglxt.webvpn.zstu.edu.cn/jwglxt/cjcx/cjcx_cxXsgrcj.html?doType=query', data=data)
+        r = s.post(url, data=data)
         j = json.loads(r.text)
         for item in j['items']:
             if item['ksxz'] == '补考一' or item['cj'] == '放弃':
